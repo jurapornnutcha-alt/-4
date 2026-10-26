@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>วัฏจักรหิน 3 มิติ: ทรัพยากรธรณี (ม.4)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a1520;--tx:#eaf1f7;--mu:#93a7b8;--ln:rgba(255,255,255,.12);--gl:rgba(255,255,255,.06);--ign:#ff8a4c;--sed:#e6b450;--met:#a78bfa;--mag:#ff4f3d;--ok:#4fd1a1;--bad:#ff6b7a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'IBM Plex Sans Thai','Sarabun',sans-serif;color:var(--tx);background:radial-gradient(1100px 700px at 75% -10%,#1d3a52,transparent 60%),radial-gradient(900px 600px at 0% 100%,#2a1b3d,transparent 55%),var(--bg);min-height:100vh;line-height:1.65}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid #7dd3fc;outline-offset:2px}
+.glass{background:var(--gl);border:1px solid var(--ln);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:18px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:14px 16px 0;padding:10px 16px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--ign),var(--met))}
+.brand h1{font-size:1.15rem;font-weight:700;line-height:1.3}
+.brand p{font-size:.78rem;color:var(--mu)}
+nav{display:flex;gap:4px;padding:4px;border-radius:14px;background:rgba(0,0,0,.25)}
+nav button{padding:8px 16px;border-radius:10px;font-size:.88rem;font-weight:500;color:var(--mu);transition:.2s}
+nav button[aria-selected=true]{background:#eaf1f7;color:#0a1520;font-weight:600}
+.view{display:none;padding:14px 16px 20px}
+.view.on{display:block}
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 390px;gap:14px;height:calc(100vh - 100px);min-height:580px}
+.stage{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--ln);background:radial-gradient(800px 500px at 50% 35%,rgba(70,120,160,.28),rgba(5,10,18,.6))}
+#cv{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#cv:active{cursor:grabbing}
+#hs,#hs *{pointer-events:none}
+#hs{position:absolute;inset:0}
+.hs{position:absolute;left:0;top:0;transition:opacity .25s}
+.hs i{position:absolute;left:-13px;top:-13px;width:26px;height:26px;border-radius:50%;background:var(--c);border:3px solid #fff;box-shadow:0 0 0 0 var(--c),0 4px 14px rgba(0,0,0,.5);animation:pu 2s infinite;pointer-events:auto;cursor:pointer}
+.hs span{position:absolute;left:18px;top:-14px;white-space:nowrap;padding:4px 10px;border-radius:999px;font-size:.78rem;font-weight:500;background:rgba(10,21,32,.82);border:1px solid var(--c);opacity:0;transform:translateX(-6px);transition:.2s}
+.hs:hover span,.hs.act span{opacity:1;transform:none}
+.hs.act i{animation:none;box-shadow:0 0 0 6px color-mix(in srgb,var(--c) 35%,transparent),0 4px 14px rgba(0,0,0,.5)}
+@keyframes pu{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--c) 70%,transparent)}100%{box-shadow:0 0 0 16px transparent}}
+.tag{position:absolute;left:0;top:0;padding:4px 10px;border-radius:8px;font-size:.78rem;font-weight:600;background:rgba(10,21,32,.85);border:1px solid var(--ln);pointer-events:none;white-space:nowrap}
+.tools{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.tools button{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(10,21,32,.7);border:1px solid var(--ln);transition:.2s}
+.tools button:hover,.tools button[aria-pressed=true]{background:#eaf1f7;color:#0a1520}
+.tools svg{width:20px;height:20px}
+.hint{position:absolute;left:12px;top:12px;font-size:.74rem;color:var(--mu);background:rgba(10,21,32,.6);padding:6px 12px;border-radius:10px;max-width:calc(100% - 210px)}
+.cap{position:absolute;left:12px;bottom:12px;max-width:min(340px,calc(100% - 24px));padding:10px 14px;font-size:.82rem}
+.cap b{display:block;font-size:.92rem}
+.cap small{color:var(--mu)}
+.panel{display:flex;flex-direction:column;gap:12px;overflow:auto;padding-right:2px}
+.card{padding:16px}
+.card h2{font-size:1rem;font-weight:700;margin-bottom:2px}
+.card .sub{font-size:.78rem;color:var(--mu);margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;font-size:.86rem;margin-top:10px}
+.val{font-weight:700;padding:2px 10px;border-radius:8px;background:rgba(0,0,0,.3);font-size:.84rem}
+input[type=range]{width:100%;margin:8px 0 2px;accent-color:var(--ign);height:6px}
+#depth{accent-color:#5ad1e6}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px}
+.presets button{padding:8px 6px;border-radius:10px;font-size:.78rem;background:rgba(255,255,255,.07);border:1px solid var(--ln);transition:.2s}
+.presets button:hover{background:rgba(255,255,255,.16)}
+.badge{display:inline-block;padding:2px 12px;border-radius:999px;font-size:.78rem;font-weight:700;color:#0a1520;background:var(--c,#999)}
+.pop{animation:pop .45s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+#info .empty{font-size:.85rem;color:var(--mu)}
+#info ul{margin:10px 0 12px 18px;font-size:.85rem;color:#cfdbe6}
+#info p{font-size:.88rem;color:#cfdbe6}
+.chip{display:inline-block;font-size:.74rem;padding:2px 10px;border-radius:999px;border:1px solid var(--c);color:var(--c);margin-bottom:8px}
+.btn{padding:10px 18px;border-radius:12px;font-weight:600;font-size:.88rem;background:linear-gradient(135deg,var(--ign),#ffb35c);color:#2a1205;transition:.2s}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.alt{background:rgba(255,255,255,.1);color:var(--tx);border:1px solid var(--ln)}
+.wrap{max-width:1180px;margin:0 auto}
+.head{text-align:center;margin:10px auto 22px;max-width:680px}
+.head h2{font-size:1.6rem;font-weight:700}
+.head p{color:var(--mu);font-size:.9rem}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.rk{padding:22px;border-top:3px solid var(--c);display:flex;flex-direction:column;gap:10px}
+.rk .ic{font-size:1.8rem}
+.rk h3{font-size:1.1rem}
+.rk .lead{font-size:.82rem;color:var(--c);font-weight:600}
+.rk h4{font-size:.88rem;margin-top:4px}
+.rk p{font-size:.84rem;color:#b8c8d6}
+.rk .ft{margin-top:auto;padding-top:12px;border-top:1px solid var(--ln);font-size:.78rem;color:var(--mu)}
+.note{padding:20px;margin-top:14px}
+.note h3{color:var(--sed);font-size:1rem;margin-bottom:6px}
+.note p{font-size:.88rem;color:#cfdbe6}
+.quiz{max-width:760px;margin:0 auto;padding:24px}
+.qb{margin-bottom:26px}
+.qb>p{font-weight:600;margin-bottom:10px}
+.opt{display:flex;gap:12px;align-items:center;padding:12px 14px;margin-bottom:8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--ln);cursor:pointer;font-size:.88rem;transition:.2s}
+.opt:hover{background:rgba(255,255,255,.11)}
+.opt input{accent-color:var(--ign)}
+.opt.sel{border-color:var(--ign);background:rgba(255,138,76,.12)}
+.opt.ok{border-color:var(--ok);background:rgba(79,209,161,.15)}
+.opt.bad{border-color:var(--bad);background:rgba(255,107,122,.15)}
+.ex{margin-top:8px;padding:12px 14px;border-radius:12px;font-size:.85rem;display:none}
+.ex.ok{display:block;background:rgba(79,209,161,.12);border:1px solid var(--ok)}
+.ex.bad{display:block;background:rgba(255,107,122,.12);border:1px solid var(--bad)}
+.qf{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:16px;border-top:1px solid var(--ln)}
+#score{font-weight:700;font-size:1.1rem;color:var(--sed)}
+@media(max-width:1024px){.lab{grid-template-columns:1fr;height:auto}.stage{height:62vh;min-height:380px}.panel{overflow:visible}.three{grid-template-columns:1fr}.hint{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="bar glass">
+<div class="brand">
+<div class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0a1520" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8 5v10l-8 5-8-5V7z"/><path d="M12 2v20M4 7l16 10M20 7L4 17"/></svg></div>
+<div><h1>วัฏจักรหิน 3 มิติ</h1><p>ทรัพยากรธรณีและการเกิดหิน · วิทยาศาสตร์โลกและอวกาศ ม.4</p></div>
+</div>
+<nav role="tablist">
+<button role="tab" data-v="lab" aria-selected="true">ห้องทดลอง 3 มิติ</button>
+<button role="tab" data-v="know" aria-selected="false">สรุปความรู้ 3 หิน</button>
+<button role="tab" data-v="quiz" aria-selected="false">แบบทดสอบ</button>
+</nav>
+</header>
+
+<main>
+<section class="view on" id="v-lab">
+<div class="lab">
+<div class="stage" id="stage">
+<canvas id="cv"></canvas>
+<div id="hs"></div>
+<div class="tag" id="ptag"></div>
+<div class="hint">ลากเพื่อหมุน · คลิกขวาลากหรือใช้สองนิ้วเพื่อเลื่อน · ล้อเมาส์เพื่อซูม · คลิกจุดเรืองแสงเพื่ออ่านข้อมูล</div>
+<div class="tools">
+<button id="b-rot" aria-pressed="false" aria-label="หมุนอัตโนมัติ" title="หมุนอัตโนมัติ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg></button>
+<button id="b-hs" aria-pressed="true" aria-label="แสดงหรือซ่อนจุดข้อมูล" title="จุดข้อมูล"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg></button>
+<button id="b-reset" aria-label="รีเซ็ตมุมมอง" title="รีเซ็ตมุมมอง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg></button>
+</div>
+<div class="cap glass"><b id="cap-n"></b><small id="cap-g"></small></div>
+</div>
+<aside class="panel">
+<div class="card glass">
+<h2>ปรับสภาวะใต้ผิวโลก</h2>
+<p class="sub">เลื่อนค่าเพื่อดูตัวอย่างหินด้านขวาของแบบจำลองเปลี่ยนไปแบบเรียลไทม์</p>
+<div class="row"><label for="temp">อุณหภูมิและความดัน</label><span class="val" id="temp-v"></span></div>
+<input type="range" id="temp" min="100" max="1300" step="10" value="700">
+<div class="row"><label for="depth">ความลึกใต้ผิวโลก</label><span class="val" id="depth-v"></span></div>
+<input type="range" id="depth" min="0" max="40" step="1" value="15">
+<div class="presets">
+<button data-p="900,2">🌋 ลาวาเย็นตัวไว</button>
+<button data-p="1000,35">🪨 แมกมาเย็นตัวช้า</button>
+<button data-p="650,25">💎 การแปรสภาพ</button>
+<button data-p="200,3">🏜️ การสะสมตะกอน</button>
+</div>
+</div>
+<div class="card glass" id="status"></div>
+<div class="card glass" id="info"><h2>ข้อมูลจากจุดเรืองแสง</h2><p class="empty">คลิกจุดเรืองแสงบนแบบจำลอง 3 มิติ เพื่อดูว่าหินแต่ละชนิดเกิดที่ไหนและเกิดอย่างไร</p></div>
+</aside>
+</div>
+</section>
+
+<section class="view" id="v-know">
+<div class="wrap">
+<div class="head"><h2>หิน 3 ประเภท</h2><p>จำแนกตามกระบวนการเกิด สภาพแวดล้อม และลักษณะเนื้อหิน</p></div>
+<div class="three">
+<article class="rk glass" style="--c:var(--ign)">
+<div class="ic">🌋</div><h3>หินอัคนี (Igneous)</h3><div class="lead">เกิดจากการเย็นตัวและแข็งตัวของแมกมาหรือลาวา</div>
+<h4>หินอัคนีพุ (Volcanic)</h4><p>ลาวาเย็นตัวบนผิวโลกอย่างรวดเร็ว ผลึกแร่เล็กมากจนมองไม่เห็นด้วยตาเปล่า เช่น หินบะซอลต์ หินพัมมิซ หินออบซิเดียน</p>
+<h4>หินอัคนีแทรกซอน (Plutonic)</h4><p>แมกมาเย็นตัวใต้ผิวโลกอย่างช้าๆ ผลึกแร่ใหญ่และหยาบ เช่น หินแกรนิต หินไดโอไรต์ หินแกบโบร</p>
+<div class="ft">ลักษณะเด่น: ผลึกแร่ประสานแน่น ไม่มีซากฟอสซิล</div>
+<button class="btn alt" data-go="volc">ดูในแบบจำลอง 3 มิติ</button>
+</article>
+<article class="rk glass" style="--c:var(--sed)">
+<div class="ic">🏜️</div><h3>หินตะกอน (Sedimentary)</h3><div class="lead">เกิดจากการสะสมตัว พัดพา และแข็งตัวของตะกอน</div>
+<h4>หินตะกอนเนื้ออนุภาค (Clastic)</h4><p>เกิดจากกรวด ทราย หรือโคลนที่ถูกบีบอัดและเชื่อมประสาน เช่น หินทราย หินดินดาน หินกรวดมน</p>
+<h4>หินตะกอนเคมีและชีวภาพ</h4><p>เกิดจากการตกตะกอนทางเคมีหรือการสะสมของซากสิ่งมีชีวิต เช่น หินปูน ถ่านหิน หินเกลือ</p>
+<div class="ft">ลักษณะเด่น: เป็นชั้นๆ (Stratification) และอาจพบซากดึกดำบรรพ์</div>
+<button class="btn alt" data-go="sed">ดูในแบบจำลอง 3 มิติ</button>
+</article>
+<article class="rk glass" style="--c:var(--met)">
+<div class="ic">💎</div><h3>หินแปร (Metamorphic)</h3><div class="lead">เกิดจากการแปรสภาพเพราะความร้อนและความดัน</div>
+<h4>หินแปรมีริ้วขนาน (Foliated)</h4><p>ผลึกแร่เรียงตัวเป็นแถบขนานจากความดันมหาศาล เช่น หินไนส์ (แปรจากแกรนิต) หินชนวน หินชีสต์</p>
+<h4>หินแปรไม่มีริ้วขนาน (Non-foliated)</h4><p>แปรสภาพจากความร้อนสูงเป็นหลัก เช่น หินอ่อน (แปรจากหินปูน) หินควอร์ตไซต์ (แปรจากหินทราย)</p>
+<div class="ft">ลักษณะเด่น: แข็งแกร่งสูง แร่เรียงตัวเป็นแถบสี</div>
+<button class="btn alt" data-go="meta">ดูในแบบจำลอง 3 มิติ</button>
+</article>
+</div>
+<div class="note glass"><h3>🔄 วัฏจักรหินคืออะไร</h3><p>หินทั้ง 3 ประเภทไม่ได้คงอยู่ถาวร แต่เปลี่ยนเป็นหินประเภทอื่นได้ตลอดเวลาผ่านกระบวนการทางธรณีวิทยา ได้แก่ การผุพังและพัดพา (เกิดหินตะกอน) การหลอมเหลวเป็นแมกมาแล้วเย็นตัว (เกิดหินอัคนี) และการได้รับความร้อนและความดันใต้ผิวโลก (เกิดหินแปร)</p></div>
+</div>
+</section>
+
+<section class="view" id="v-quiz">
+<div class="quiz glass">
+<div class="head" style="margin-top:0"><h2>แบบทดสอบความเข้าใจ</h2><p>เรื่อง วัฏจักรหินและการเกิดหินชนิดต่างๆ (3 ข้อ)</p></div>
+<div id="qs"></div>
+<div class="qf"><button class="btn" id="q-check">ตรวจคำตอบ</button><button class="btn alt" id="q-reset">ทำใหม่</button><span id="score" aria-live="polite"></span></div>
+</div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const C={ign:'#ff8a4c',sed:'#e6b450',met:'#a78bfa',mag:'#ff4f3d'};
+const HS=[
+{id:'volc',t:'ภูเขาไฟและลาวา',k:'หินอัคนีพุ',c:C.ign,a:[-1.7,1.25,0],n:[0,1,0],cp:[-1,2.5,8],ct:[-1.7,.2,0],p:[900,2],d:'ลาวาไหลออกสู่ผิวโลกแล้วเย็นตัวอย่างรวดเร็ว ผลึกแร่จึงเล็กมากจนมองไม่เห็นด้วยตาเปล่า',f:['ตัวอย่าง: บะซอลต์ พัมมิซ ออบซิเดียน','เนื้อละเอียด (Fine-grained)','อาจมีรูพรุนจากฟองแก๊ส'],r:'0–10 กม.'},
+{id:'mag',t:'ห้องแมกมา',k:'แมกมา',c:C.mag,a:[-1.7,-4.35,1.4],n:[0,0,1],cp:[-3,-2.5,7.5],ct:[-1.7,-4,0],p:[1200,35],d:'แมกมาสะสมอยู่ลึกใต้ผิวโลก อุณหภูมิสูงกว่า 1,050 °C เป็นแหล่งกำเนิดของหินอัคนีทุกชนิด',f:['ถ้าปะทุขึ้นมาบนผิวโลก เรียกว่าลาวา','ถ้าเย็นตัวใต้ดิน เกิดหินอัคนีแทรกซอน','การหลอมเหลวของหินทำให้วัฏจักรวนกลับมาที่แมกมา'],r:'30–40 กม.'},
+{id:'plut',t:'ก้อนหินอัคนีแทรกซอน',k:'หินอัคนีแทรกซอน',c:C.ign,a:[1.7,-1.9,1.4],n:[0,0,1],cp:[3.5,-.8,7.5],ct:[1.7,-1.9,0],p:[1000,35],d:'แมกมาเย็นตัวช้ามากใต้ผิวโลก ผลึกแร่จึงมีเวลาเติบโตจนใหญ่และหยาบ',f:['ตัวอย่าง: แกรนิต ไดโอไรต์ แกบโบร','เนื้อหยาบ (Coarse-grained)','ผลึกประสานแน่น ไม่มีซากฟอสซิล'],r:'10–20 กม.'},
+{id:'sed',t:'ชั้นหินตะกอน',k:'หินตะกอน',c:C.sed,a:[2.4,-.5,1.3],n:[0,0,1],cp:[3.5,.8,8],ct:[1,-.5,0],p:[200,3],d:'ตะกอนสะสมเป็นชั้น ถูกทับถม บีบอัด และเชื่อมประสานจนแข็งตัวเป็นหิน',f:['ตัวอย่าง: หินทราย หินดินดาน หินปูน','เห็นเป็นชั้นๆ (Stratification)','อาจพบซากดึกดำบรรพ์'],r:'0–8 กม.'},
+{id:'meta',t:'เขตหินแปร',k:'หินแปร',c:C.met,a:[.3,-2.9,1.3],n:[0,0,1],cp:[1,-1.5,8],ct:[.3,-2.9,0],p:[650,25],d:'ความร้อนและความดันสูงทำให้แร่ตกผลึกใหม่ เรียงตัวเป็นริ้วขนาน (Foliation)',f:['ตัวอย่าง: ไนส์ ชีสต์ หินชนวน','แกรนิต → ไนส์ · หินปูน → หินอ่อน','หินอ่อนและควอร์ตไซต์ไม่มีริ้วขนาน'],r:'16–30 กม.'},
+{id:'wea',t:'ผุพังและพัดพา',k:'กระบวนการบนผิวโลก',c:C.sed,a:[.7,.05,1.1],n:[0,1,0],cp:[2,3,8],ct:[.7,0,.5],p:[150,1],d:'ลม น้ำ และน้ำแข็งทำให้หินผุพัง แล้วพัดพาไปทับถมเป็นตะกอน เริ่มต้นการเกิดหินตะกอน',f:['ตะกอนทับถม → บีบอัด → เชื่อมประสาน','หินทุกชนิดผุพังเป็นตะกอนได้','ขับเคลื่อนโดยน้ำ ลม และน้ำแข็ง'],r:'0–1 กม.'}
+];
+const Q=[
+{q:'ถ้านักเรียนพบหินที่มีผลึกแร่ขนาดใหญ่ หยาบ และประสานตัวแน่น สันนิษฐานได้ว่าหินนี้เกิดจากกระบวนการใด',o:['ลาวาเย็นตัวลงอย่างรวดเร็วบนพื้นผิวโลก','แมกมาค่อยๆ เย็นตัวลงอย่างช้าๆ ใต้ผิวโลกที่ความลึกมาก','การทับถมของตะกอนทรายในทะเลเป็นเวลานาน','การได้รับความร้อนอย่างเดียวจนหินละลายตกผลึกใหม่'],a:1,e:'แมกมาเย็นตัวช้าๆ ใต้ดินลึก ผลึกแร่จึงมีเวลาเติบโตจนได้ขนาดใหญ่ (หินอัคนีแทรกซอน)'},
+{q:'หินชนิดใดเกิดจากการแปรสภาพเพราะความดันและความร้อนสูง จนผลึกแร่เรียงตัวเป็นริ้วขนาน (Foliation)',o:['หินอ่อน (Marble)','หินบะซอลต์ (Basalt)','หินไนส์ (Gneiss)','หินทราย (Sandstone)'],a:2,e:'หินไนส์เป็นหินแปรที่มีริ้วขนานชัดเจน แปรสภาพมาจากหินแกรนิต ส่วนหินอ่อนเป็นหินแปรแบบไม่มีริ้วขนาน'},
+{q:'ถ้านำหินปูน (หินตะกอน) ไปไว้ในบริเวณที่ลึกและอุณหภูมิสูงมากๆ โดยยังไม่หลอมเป็นแมกมา หินปูนจะเปลี่ยนเป็นหินชนิดใด',o:['หินอ่อน (Marble)','หินแกรนิต (Granite)','หินควอร์ตไซต์ (Quartzite)','หินพัมมิซ (Pumice)'],a:0,e:'หินปูนเมื่อได้รับความร้อนและความดันสูงใต้ผิวโลก จะแปรสภาพเป็นหินอ่อน (Marble)'}
+];
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.v));
+function tab(v){
+document.querySelectorAll('nav button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
+document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));
+labOn=v==='lab';
+}
+let labOn=true;
+
+function state(t,d){
+if(t>=1050)return{k:'melt',n:'สารหลอมเหลว (แมกมา / ลาวา)',c:C.mag,g:'ยังไม่ตกผลึก (ของเหลวหลอมเหลว)',x:'อุณหภูมิ '+t+' °C สูงจนหินหลอมเหลวทั้งหมด ถ้าอยู่ตื้นเป็นลาวาปะทุบนผิวโลก ถ้าอยู่ลึกเป็นแมกมากักเก็บใต้ดิน'};
+if(t>=800)return d<10?{k:'volc',n:'หินอัคนีพุ',c:C.ign,g:'ผลึกเล็กมาก เนื้อละเอียด (Fine-grained)',x:'เย็นตัวอย่างรวดเร็วบนหรือใกล้ผิวโลก แร่ตกผลึกไม่ทัน ได้ผลึกเล็กมากจนมองไม่เห็นด้วยตาเปล่า เช่น หินบะซอลต์'}:{k:'plut',n:'หินอัคนีแทรกซอน',c:C.ign,g:'ผลึกใหญ่ เนื้อหยาบ (Coarse-grained)',x:'เย็นตัวช้าๆ ใต้ผิวโลกที่ลึกมาก โมเลกุลมีเวลาจัดเรียงเป็นผลึกแร่ขนาดใหญ่และหยาบ มองเห็นชัดเจน เช่น หินแกรนิต'};
+if(t>=400&&d>=15)return{k:'meta',n:'หินแปร',c:C.met,g:'ผลึกเรียงเป็นริ้วขนาน (Foliated)',x:'ความร้อน '+t+' °C ร่วมกับความดันมหาศาลที่ลึก '+d+' กม. บีบอัดและตกผลึกใหม่ เกิดริ้วขนาน (Foliation) เช่น หินไนส์ หินชีสต์'};
+if(d<10)return{k:'sed',n:'หินตะกอน (หินชั้น)',c:C.sed,g:'เม็ดตะกอนอัดแน่นเป็นชั้น',x:'อุณหภูมิและความดันต่ำ ตะกอนสะสมตัว บีบอัด และเชื่อมประสานเป็นชั้นหิน เช่น หินทราย หินดินดาน'};
+return{k:'base',n:'หินดั้งเดิมในสภาวะเสถียร',c:'#8fb3d9',g:'ผลึกแร่ขนาดปานกลาง',x:'อุณหภูมิและความดันอยู่ในระดับปานกลาง หินยังรักษาโครงสร้างเดิม หรือเริ่มเข้าสู่การแปรสภาพระยะแรก'};
+}
+
+if(typeof THREE==='undefined'){$('#stage').innerHTML='<p style="padding:24px">ไม่สามารถโหลด Three.js ได้ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรชหน้านี้</p>';}
+else{
+const stage=$('#stage'),cv=$('#cv');
+const ren=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));
+ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;
+const scene=new THREE.Scene();
+scene.fog=new THREE.Fog(0x0a1520,22,48);
+const cam=new THREE.PerspectiveCamera(40,1,.1,100);
+const HOME={p:new THREE.Vector3(7.5,3.2,11.5),t:new THREE.Vector3(1.2,-1.8,0)};
+cam.position.copy(HOME.p);
+const ctl=new THREE.OrbitControls(cam,cv);
+ctl.target.copy(HOME.t);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=4;ctl.maxDistance=24;ctl.maxPolarAngle=1.75;ctl.screenSpacePanning=true;ctl.autoRotateSpeed=1.2;
+let tw=null;
+ctl.addEventListener('start',()=>{tw=null});
+function fly(p,t){tw={s:performance.now(),p0:cam.position.clone(),t0:ctl.target.clone(),p1:new THREE.Vector3(...p),t1:new THREE.Vector3(...t)}}
+
+scene.add(new THREE.AmbientLight(0xbfd4ee,.35));
+scene.add(new THREE.HemisphereLight(0xcfe3ff,0x2a1b3d,.5));
+const sun=new THREE.DirectionalLight(0xffffff,.8);
+sun.position.set(5,9,9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:1,far:30});sun.shadow.bias=-.0005;
+scene.add(sun);
+const hot1=new THREE.PointLight(0xff6a2a,1.4,9);hot1.position.set(-1.7,-4.3,2.2);scene.add(hot1);
+const hot2=new THREE.PointLight(0xff7a30,1,6);hot2.position.set(-1.7,1.6,1.2);scene.add(hot2);
+
+function tex(base,dots,size,bands){
+const c=document.createElement('canvas');c.width=c.height=256;
+const x=c.getContext('2d');x.fillStyle=base;x.fillRect(0,0,256,256);
+for(let i=0;i<dots;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.14)':'rgba(0,0,0,.2)';const s=Math.random()*size+1;x.fillRect(Math.random()*256,Math.random()*256,s,s)}
+for(let i=0;i<bands;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.06)':'rgba(0,0,0,.1)';x.fillRect(0,Math.random()*256,256,Math.random()*10+2)}
+return new THREE.CanvasTexture(c);
+}
+function glowTex(){
+const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');
+const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.35,'rgba(255,255,255,.35)');g.addColorStop(1,'rgba(255,255,255,0)');
+x.fillStyle=g;x.fillRect(0,0,64,64);return new THREE.CanvasTexture(c);
+}
+const GT=glowTex();
+const rock=new THREE.Group();scene.add(rock);
+const W=7,Dp=2.4;
+function slab(y0,y1,col,dots,size){
+const h=y0-y1;
+const m=new THREE.Mesh(new THREE.BoxGeometry(W,h,Dp),new THREE.MeshStandardMaterial({map:tex(col,dots,size,6),roughness:.9,metalness:0}));
+m.position.y=(y0+y1)/2;m.castShadow=true;m.receiveShadow=true;rock.add(m);
+const e=new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry),new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.18}));
+e.position.copy(m.position);rock.add(e);
+}
+['#d8b36a','#b98a4a','#c9a46a','#8f6a3f'].forEach((c,i)=>slab(-i*.25,-(i+1)*.25,c,900,3));
+slab(-1,-2,'#7d8794',700,5);
+for(let i=0;i<7;i++)slab(-2-i*.25,-2-(i+1)*.25,i%2?'#5b4a9c':'#9c8ae0',900,3);
+slab(-3.75,-5,'#4a2a2a',700,4);
+
+const base=new THREE.Mesh(new THREE.CylinderGeometry(6.4,6.6,.2,64),new THREE.MeshStandardMaterial({color:0x101c28,roughness:.35,metalness:.3}));
+base.position.y=-5.35;base.receiveShadow=true;scene.add(base);
+const ring=new THREE.Mesh(new THREE.RingGeometry(6.1,6.2,64),new THREE.MeshBasicMaterial({color:0x5ad1e6,transparent:true,opacity:.5,side:THREE.DoubleSide}));
+ring.rotation.x=-Math.PI/2;ring.position.y=-5.24;scene.add(ring);
+
+const volc=new THREE.Group();
+const cone=new THREE.Mesh(new THREE.CylinderGeometry(.28,1,1.15,40),new THREE.MeshStandardMaterial({map:tex('#4a4448',700,3,4),roughness:.95}));
+cone.position.y=.575;cone.castShadow=true;cone.receiveShadow=true;
+const lava=new THREE.Mesh(new THREE.CylinderGeometry(.26,.26,.05,32),new THREE.MeshStandardMaterial({color:0xff5a1f,emissive:0xff5a1f,emissiveIntensity:1.2}));
+lava.position.y=1.14;
+volc.add(cone,lava);volc.position.set(-1.7,0,0);volc.scale.set(1.5,1,1);rock.add(volc);
+
+const chamber=new THREE.Mesh(new THREE.SphereGeometry(1,40,24),new THREE.MeshStandardMaterial({color:0xa02a10,emissive:0xff5a1f,emissiveIntensity:1,roughness:.5}));
+chamber.scale.set(1.5,.55,.8);chamber.position.set(-1.7,-4.35,.5);rock.add(chamber);
+const vein=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,4.1,16),new THREE.MeshStandardMaterial({color:0xff5a1f,emissive:0xff6a2a,emissiveIntensity:1.1}));
+vein.position.set(-1.7,-2,1.2);rock.add(vein);
+const pluton=new THREE.Mesh(new THREE.SphereGeometry(1,48,32),new THREE.MeshStandardMaterial({map:tex('#c9a9a0',420,11,0),roughness:.7}));
+pluton.scale.set(1.25,.7,.85);pluton.position.set(1.7,-1.9,.45);pluton.castShadow=true;pluton.receiveShadow=true;rock.add(pluton);
+
+[[-1.7,1.2,0,2.6,0xff6a2a],[-1.7,-4.35,1.1,5,0xff5a1f]].forEach(a=>{
+const s=new THREE.Sprite(new THREE.SpriteMaterial({map:GT,color:a[4],transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));
+s.position.set(a[0],a[1],a[2]);s.scale.setScalar(a[3]);scene.add(s);
+});
+
+const EN=90,ep=new Float32Array(EN*3),ev=[];
+function ember(i,r){ep[i*3]=-1.7+(Math.random()-.5)*.4;ep[i*3+1]=1.15+(r?Math.random()*2.2:0);ep[i*3+2]=(Math.random()-.5)*.3;ev[i]=[(Math.random()-.5)*.012,.012+Math.random()*.02,(Math.random()-.5)*.01]}
+for(let i=0;i<EN;i++)ember(i,true);
+const eg=new THREE.BufferGeometry();eg.setAttribute('position',new THREE.BufferAttribute(ep,3));
+const em=new THREE.PointsMaterial({map:GT,color:0xff8a3c,size:.28,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false});
+scene.add(new THREE.Points(eg,em));
+
+const dN=260,dp=new Float32Array(dN*3);
+for(let i=0;i<dN;i++){dp[i*3]=(Math.random()-.5)*26;dp[i*3+1]=Math.random()*12-7;dp[i*3+2]=(Math.random()-.5)*26}
+const dg=new THREE.BufferGeometry();dg.setAttribute('position',new THREE.BufferAttribute(dp,3));
+scene.add(new THREE.Points(dg,new THREE.PointsMaterial({color:0x9fc3e8,size:.06,transparent:true,opacity:.5})));
+
+const probe=new THREE.Mesh(new THREE.SphereGeometry(.13,24,16),new THREE.MeshBasicMaterial({color:0xff8a4c}));
+const band=new THREE.Mesh(new THREE.BoxGeometry(W+.06,.035,Dp+.06),new THREE.MeshBasicMaterial({color:0xff8a4c,transparent:true,opacity:.4,depthWrite:false}));
+scene.add(probe,band);
+
+const spec=new THREE.Group();spec.position.set(5.3,-.4,.3);scene.add(spec);
+const pad=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,.06,48),new THREE.MeshStandardMaterial({color:0x1b2c3d,roughness:.4,metalness:.4}));
+pad.position.set(5.3,-1.75,.3);pad.receiveShadow=true;scene.add(pad);
+const GE={s:new THREE.SphereGeometry(1,10,8),o:new THREE.OctahedronGeometry(1),h:new THREE.CylinderGeometry(.5,.5,2,6),i:new THREE.IcosahedronGeometry(1,0)};
+const PS={
+melt:{g:'s',n:36,z:[.2,.4],c:['#ff7a1a','#ffb02e','#ff4f1f'],e:1},
+volc:{g:'o',n:320,z:[.05,.09],c:['#2b2a2e','#3d3a40','#5a4f4a']},
+plut:{g:'h',n:48,z:[.2,.34],c:['#e8b4a6','#f1ece4','#2d2b2e','#c98f86']},
+meta:{g:'s',n:160,z:[.14,.24],c:['#cdb8ff','#4c3a8f'],l:1,f:1},
+sed:{g:'s',n:240,z:[.07,.12],c:['#d8b36a','#a8793f','#7a5632'],l:1},
+base:{g:'i',n:130,z:[.09,.17],c:['#7d8794','#5f6b78','#9aa4b0']}
+};
+const MC={};
+function mat(c,e){const k=c+e;return MC[k]||(MC[k]=new THREE.MeshStandardMaterial({color:c,roughness:.6,emissive:e?c:0x000000,emissiveIntensity:e?.9:0}))}
+let sk='',sc=1;
+function buildSpec(k,d){
+while(spec.children.length)spec.remove(spec.children[0]);
+const P=PS[k],f=k==='plut'?.6+d/40*.9:k==='volc'?.7+d/10*.5:1;
+for(let i=0;i<P.n;i++){
+const m=new THREE.Mesh(GE[P.g],mat(P.c[0],0));
+const s=(P.z[0]+Math.random()*(P.z[1]-P.z[0]))*f;
+let x=(Math.random()-.5)*1.7,y=(Math.random()-.5)*1.7,z=(Math.random()-.5)*1.7,ci=Math.floor(Math.random()*P.c.length);
+if(P.g==='s'&&P.e){const r=Math.random()*.8,a=Math.random()*6.28,b=Math.acos(2*Math.random()-1);x=r*Math.sin(b)*Math.cos(a);y=r*Math.sin(b)*Math.sin(a);z=r*Math.cos(b)}
+if(P.l){const b=Math.floor(Math.random()*8);y=-.84+b*.24+Math.random()*.05;ci=P.f?b%2:b%3}
+m.material=mat(P.c[ci],P.e);
+m.position.set(x,y,z);
+if(P.f)m.scale.set(s*1.9,s*.3,s*1.9);else m.scale.setScalar(s);
+if(!P.l&&!P.e)m.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+m.castShadow=true;m.userData={y:y,o:Math.random()*6};
+spec.add(m);
+}
+sc=.05;spec.scale.setScalar(sc);
+}
+
+const ST=$('#status'),tIn=$('#temp'),dIn=$('#depth');
+let cur=null;
+function sync(){
+const t=+tIn.value,d=+dIn.value,s=state(t,d);cur=s;
+$('#temp-v').textContent=t+' °C';$('#depth-v').textContent=d+' กม.';
+ST.innerHTML='<span class="badge" style="--c:'+s.c+'">'+s.n+'</span><p style="font-size:.86rem;color:#cfdbe6;margin-top:10px">'+s.x+'</p>';
+ST.classList.remove('pop');void ST.offsetWidth;ST.classList.add('pop');
+$('#cap-n').textContent='ตัวอย่างหินขยาย: '+s.n;$('#cap-g').textContent='ลักษณะเนื้อหิน: '+s.g;
+const col=new THREE.Color().setHSL(.62*(1-(t-100)/1200),.9,.55);
+probe.material.color.copy(col);band.material.color.copy(col);
+$('#ptag').textContent=t+' °C · '+d+' กม.';$('#ptag').style.borderColor='#'+col.getHexString();
+const key=s.k+(s.k==='plut'?Math.floor(d/8):s.k==='volc'?Math.floor(d/3):'');
+if(key!==sk){sk=key;buildSpec(s.k,d)}
+em.opacity=t>=800?.9:.2;
+}
+tIn.oninput=dIn.oninput=sync;
+document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{const p=b.dataset.p.split(',');tIn.value=p[0];dIn.value=p[1];sync()});
+
+const HL=$('#hs');let act=null;
+HS.forEach(h=>{
+const e=document.createElement('div');e.className='hs';e.style.setProperty('--c',h.c);
+e.innerHTML='<i role="button" tabindex="0" aria-label="'+h.t+'"></i><span>'+h.t+'</span>';
+HL.appendChild(e);h.el=e;h.w=new THREE.Vector3(...h.a);h.nv=new THREE.Vector3(...h.n);
+e.firstChild.onclick=()=>openHS(h.id);
+e.firstChild.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();openHS(h.id)}};
+});
+function openHS(id){
+const h=HS.find(x=>x.id===id);if(!h)return;
+tab('lab');act=id;
+HS.forEach(x=>x.el.classList.toggle('act',x===h));
+const I=$('#info');
+I.style.setProperty('--c',h.c);
+I.innerHTML='<span class="chip">'+h.k+'</span><h2>'+h.t+'</h2><p class="sub" style="margin-bottom:8px">ความลึกโดยประมาณ '+h.r+'</p><p>'+h.d+'</p><ul>'+h.f.map(x=>'<li>'+x+'</li>').join('')+'</ul><button class="btn" id="apply">จำลองสภาวะนี้</button>';
+I.classList.remove('pop');void I.offsetWidth;I.classList.add('pop');
+$('#apply').onclick=()=>{tIn.value=h.p[0];dIn.value=h.p[1];sync()};
+fly(h.cp,h.ct);
+}
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>openHS(b.dataset.go));
+
+$('#b-rot').onclick=e=>{ctl.autoRotate=!ctl.autoRotate;e.currentTarget.setAttribute('aria-pressed',ctl.autoRotate)};
+$('#b-hs').onclick=e=>{const on=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',on);HL.style.display=on?'block':'none'};
+$('#b-reset').onclick=()=>{ctl.autoRotate=false;$('#b-rot').setAttribute('aria-pressed','false');fly(HOME.p.toArray(),HOME.t.toArray())};
+
+let SW=1,SH=1;
+new ResizeObserver(()=>{
+const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;
+SW=w;SH=h;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();
+}).observe(stage);
+
+const tmp=new THREE.Vector3(),dir=new THREE.Vector3(),clk=new THREE.Clock();
+function proj(v,out){out.copy(v).project(cam);return[(out.x*.5+.5)*SW,(-out.y*.5+.5)*SH,out.z]}
+function loop(){
+requestAnimationFrame(loop);
+if(!labOn||document.hidden)return;
+const t=clk.getElapsedTime();
+if(tw){
+const k=Math.min(1,(performance.now()-tw.s)/1100),e=1-Math.pow(1-k,3);
+cam.position.lerpVectors(tw.p0,tw.p1,e);ctl.target.lerpVectors(tw.t0,tw.t1,e);
+if(k>=1)tw=null;
+}
+ctl.update();
+const pu=.85+.25*Math.sin(t*2.2);
+chamber.material.emissiveIntensity=pu;vein.material.emissiveIntensity=pu;lava.material.emissiveIntensity=pu*1.3;
+hot1.intensity=1.1+.4*Math.sin(t*2.2);hot2.intensity=.8+.3*Math.sin(t*3.1+1);
+for(let i=0;i<EN;i++){
+ep[i*3]+=ev[i][0];ep[i*3+1]+=ev[i][1];ep[i*3+2]+=ev[i][2];
+if(ep[i*3+1]>3.4)ember(i,false);
+}
+eg.attributes.position.needsUpdate=true;
+const dy=-(+dIn.value)/40*5;
+probe.position.set(3.15,dy,1.25);band.position.set(0,dy,0);
+sc+=(1-sc)*.1;spec.scale.setScalar(sc);spec.rotation.y=t*.45;
+if(sk.indexOf('melt')===0)spec.children.forEach(m=>{m.position.y=m.userData.y+Math.sin(t*2+m.userData.o)*.07});
+tmp.set(3.6,dy+.02,1.3);const pp=proj(tmp,new THREE.Vector3());
+const tg=$('#ptag');tg.style.transform='translate('+(pp[0]+8)+'px,'+(pp[1]-14)+'px)';
+HS.forEach(h=>{
+const p=proj(h.w,new THREE.Vector3());
+dir.copy(cam.position).sub(h.w);
+const vis=dir.dot(h.nv)>0&&p[2]<1;
+h.el.style.transform='translate('+p[0]+'px,'+p[1]+'px)';
+h.el.style.opacity=vis?1:0;
+h.el.firstChild.style.pointerEvents=vis?'auto':'none';
+});
+ren.render(scene,cam);
+}
+sync();loop();
+}
+
+const qs=$('#qs');
+function renderQuiz(){
+qs.innerHTML=Q.map((q,i)=>'<div class="qb"><p>'+(i+1)+'. '+q.q+'</p>'+q.o.map((o,j)=>'<label class="opt" data-q="'+i+'" data-o="'+j+'"><input type="radio" name="q'+i+'" value="'+j+'"><span>'+'กขคง'[j]+') '+o+'</span></label>').join('')+'<div class="ex" id="ex'+i+'"></div></div>').join('');
+$('#score').textContent='';
+qs.querySelectorAll('input').forEach(r=>r.onchange=()=>{
+const i=r.name.slice(1);
+qs.querySelectorAll('.opt[data-q="'+i+'"]').forEach(l=>l.classList.toggle('sel',l.contains(r)&&r.checked));
+});
+}
+$('#q-check').onclick=()=>{
+const ans=Q.map((q,i)=>{const r=qs.querySelector('input[name=q'+i+']:checked');return r?+r.value:-1});
+if(ans.includes(-1)){$('#score').textContent='กรุณาตอบให้ครบทั้ง 3 ข้อก่อนตรวจคำตอบ';return}
+let s=0;
+Q.forEach((q,i)=>{
+const ok=ans[i]===q.a;if(ok)s++;
+qs.querySelectorAll('.opt[data-q="'+i+'"]').forEach(l=>{
+const o=+l.dataset.o;l.classList.remove('sel','ok','bad');
+if(o===q.a)l.classList.add('ok');else if(o===ans[i])l.classList.add('bad');
+});
+const ex=$('#ex'+i);ex.className='ex pop '+(ok?'ok':'bad');
+ex.innerHTML=(ok?'✅ <strong>ถูกต้อง!</strong> ':'❌ <strong>ยังไม่ถูกต้อง</strong> เฉลย: ข้อ '+'กขคง'[q.a]+' ')+q.e;
+});
+$('#score').textContent='สรุปคะแนน: '+s+' / 3 คะแนน';
+};
+$('#q-reset').onclick=renderQuiz;
+renderQuiz();
+</script>
+</body>
+</html>
